@@ -1,0 +1,81 @@
+﻿
+@model  IEnumerable<TipoCuenta>
+
+@{
+    ViewData["Title"] = "Tipos Cuentas";
+}
+
+<h1>Tipos de Cuentas</h1>
+<h5>El Tipo de Cuenta se refiere  a como podemos agrupar cuentas
+    Ejemplos:Prestamos, Tarjetas de Credito, etc.</h5>
+
+<a asp-controller="TiposCuentas" asp-action="Crear" class="btn btn-primary">Crear Nuevo</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Acciones</th>
+            <th>Nombre</th>
+        </tr>
+    </thead>
+    <tbody id="reordenable">
+        @foreach (var tipoCuenta in Model)
+        {
+            <tr>
+                <td>
+                    <input type="hidden" value="@tipoCuenta.Id" class="ids" />
+                    <a class="btn btn-primary" asp-controller="TiposCuentas" asp-action="Editar" asp-route-Id="@tipoCuenta.Id">Editar</a>
+                    <a class="btn btn-danger" asp-controller="TiposCuentas" asp-action="Borrar" asp-route-Id="@tipoCuenta.Id">Eliminar</a>
+                </td>
+                <td>
+                    @tipoCuenta.Nombre
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts{ 
+
+    <script>
+        $(function () {
+         
+           const urlOrdenar='@Url.Action("ordenar")';
+
+
+
+            $("#reordenable").sortable({
+                stop: async function (e, ui) {
+                    await actualizarOrdenes();
+                }
+            });
+
+            async function actualizarOrdenes() {
+                const ids = obtenerIdsElementos();
+
+               await enviarIdsAlBackEnd(ids);
+            }
+
+            function obtenerIdsElementos() {
+                const ids = $(".ids").map(function () {
+                    return $(this).val();
+                }).get();
+
+                return ids;
+            }
+
+            async function enviarIdsAlBackEnd(ids) {
+                var data = JSON.stringify(ids);
+
+                await fetch(urlOrdenar, {
+                    method: 'POST',
+                    body: data,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+            }
+        })
+    </script>
+
+}
